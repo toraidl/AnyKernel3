@@ -4,23 +4,23 @@
 ## AnyKernel setup
 # begin properties
 properties() { '
-kernel.string=ExampleKernel by osm0sis @ xda-developers
+kernel.string=MiuiCX Kernel by Coolapk @TheVoyager
 do.devicecheck=1
 do.modules=0
 do.systemless=1
 do.cleanup=1
 do.cleanuponabort=0
-device.name1=maguro
-device.name2=toro
-device.name3=toroplus
-device.name4=tuna
+device.name1=cepheus
+device.name2=raphael
+device.name3=
+device.name4=
 device.name5=
-supported.versions=
+supported.versions=11-12
 supported.patchlevels=
 '; } # end properties
 
 # shell variables
-block=/dev/block/platform/omap/omap_hsmmc.0/by-name/boot;
+block=/dev/block/bootdevice/by-name/boot;
 is_slot_device=0;
 ramdisk_compression=auto;
 patch_vbmeta_flag=auto;
@@ -36,29 +36,65 @@ patch_vbmeta_flag=auto;
 set_perm_recursive 0 0 755 644 $ramdisk/*;
 set_perm_recursive 0 0 750 750 $ramdisk/init* $ramdisk/sbin;
 
+## Select the correct image to flash
+userflavor="$(file_getprop /system/build.prop "ro.build.flavor")";
+case "$userflavor" in
+    qssi-user) os="miui"; os_string="MIUI ROM";;
+    raphael-user) os="miui"; os_string="MIUI ROM";;
+    cepheus-user) os="miui"; os_string="MIUI ROM";;
+    *) os="aosp"; os_string="AOSP ROM";;
+esac;
+ui_print "  -> $os_string is detected!";
+if [ -f $home/kernels/$os/Image ] && [ -f $home/kernels/$os/dtb ] && [ -f $home/kernels/$os/dtbo.img ]; then
+    mv $home/kernels/$os/Image $home/Image;
+    mv $home/kernels/$os/dtb $home/dtb;
+    mv $home/kernels/$os/dtbo.img $home/dtbo.img;
+else
+    ui_print "  -> There is no kernel for your OS in this zip! Aborting...";
+    exit 1;
+fi;
 
 ## AnyKernel boot install
 dump_boot;
 
-# begin ramdisk changes
-
-# init.rc
-backup_file init.rc;
-replace_string init.rc "cpuctl cpu,timer_slack" "mount cgroup none /dev/cpuctl cpu" "mount cgroup none /dev/cpuctl cpu,timer_slack";
-
-# init.tuna.rc
-backup_file init.tuna.rc;
-insert_line init.tuna.rc "nodiratime barrier=0" after "mount_all /fstab.tuna" "\tmount ext4 /dev/block/platform/omap/omap_hsmmc.0/by-name/userdata /data remount nosuid nodev noatime nodiratime barrier=0";
-append_file init.tuna.rc "bootscript" init.tuna;
-
-# fstab.tuna
-backup_file fstab.tuna;
-patch_fstab fstab.tuna /system ext4 options "noatime,barrier=1" "noatime,nodiratime,barrier=0";
-patch_fstab fstab.tuna /cache ext4 options "barrier=1" "barrier=0,nomblk_io_submit";
-patch_fstab fstab.tuna /data ext4 options "data=ordered" "nomblk_io_submit,data=writeback";
-append_file fstab.tuna "usbdisk" fstab;
-
-# end ramdisk changes
+case "$ZIPFILE" in
+  *66fps*|*66hz*)
+    ui_print "  • Setting 66 Hz refresh rate"
+    patch_cmdline "msm_drm.framerate_override" "msm_drm.framerate_override=1"
+    ;;
+  *69fps*|*69hz*)
+    ui_print "  • Setting 69 Hz refresh rate"
+    patch_cmdline "msm_drm.framerate_override" "msm_drm.framerate_override=2"
+    ;;
+  *72fps*|*72hz*)
+    ui_print "  • Setting 72 Hz refresh rate"
+    patch_cmdline "msm_drm.framerate_override" "msm_drm.framerate_override=3"
+    ;;
+  *75fps*|*75hz*)
+    ui_print "  • Setting 75 Hz refresh rate"
+    patch_cmdline "msm_drm.framerate_override" "msm_drm.framerate_override=4"
+    ;;
+  *81fps*|*81hz*)
+    ui_print "  • Setting 81 Hz refresh rate"
+    patch_cmdline "msm_drm.framerate_override" "msm_drm.framerate_override=5"
+    ;;
+  *84fps*|*84hz*)
+    ui_print "  • Setting 84 Hz refresh rate"
+    patch_cmdline "msm_drm.framerate_override" "msm_drm.framerate_override=6"
+    ;;
+  *90fps*|*90hz*)
+    ui_print "  • Setting 90 Hz refresh rate"
+    patch_cmdline "msm_drm.framerate_override" "msm_drm.framerate_override=7"
+    ;;
+  *)
+    patch_cmdline "msm_drm.framerate_override" ""
+    fr=$(cat /sys/module/msm_drm/parameters/framerate_override | tr -cd "[0-9]");
+    [ $fr -eq 66 ] && ui_print "  • Setting 66 Hz refresh rate" && patch_cmdline "msm_drm.framerate_override" "msm_drm.framerate_override=1"
+    [ $fr -eq 69 ] && ui_print "  • Setting 69 Hz refresh rate" && patch_cmdline "msm_drm.framerate_override" "msm_drm.framerate_override=2"
+    [ $fr -eq 72 ] && ui_print "  • Setting 72 Hz refresh rate" && patch_cmdline "msm_drm.framerate_override" "msm_drm.framerate_override=3"
+    [ $fr -eq 75 ] && ui_print "  • Setting 75 Hz refresh rate" && patch_cmdline "msm_drm.framerate_override" "msm_drm.framerate_override=4"
+    ;;
+esac
 
 write_boot;
 ## end boot install
