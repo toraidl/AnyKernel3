@@ -38,15 +38,14 @@ case "$userflavor" in
     missi-user) os="miui"; os_string="MIUI ROM";;
     missi_phoneext4_cn-user) os="miui"; os_string="MIUI ROM";;
     missi_phone_cn-user) os="miui"; os_string="MIUI ROM";;
-    missi_phone_cn_only64-user) os="miui"; os_string="HyperOS ROM";;
+    missi_phone_cn_only64-user) os="hos"; os_string="HyperOS ROM";;
     qssi-user) os="miui"; os_string="MIUI ROM";;
     *) os="aosp"; os_string="AOSP ROM";;
 esac;
+os="hos"
 ui_print "  -> $os_string is detected!";
-if [ -f $home/kernels/$os/Image ] && [ -f $home/kernels/$os/dtb ] && [ -f $home/kernels/$os/dtbo.img ]; then
+if [ -f $home/kernels/$os/Image ]; then
     mv $home/kernels/$os/Image $home/Image;
-    mv $home/kernels/$os/dtb $home/dtb;
-    mv $home/kernels/$os/dtbo.img $home/dtbo.img;
 else
     ui_print "  -> There is no kernel for your OS in this zip! Aborting...";
     exit 1;
