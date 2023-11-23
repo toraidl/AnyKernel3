@@ -38,6 +38,7 @@ case "$userflavor" in
     missi-user) os="miui"; os_string="MIUI ROM";;
     missi_phoneext4_cn-user) os="miui"; os_string="MIUI ROM";;
     missi_phone_cn-user) os="miui"; os_string="MIUI ROM";;
+    missi_phone_cn_only64-user) os="miui"; os_string="HyperOS ROM";;
     qssi-user) os="miui"; os_string="MIUI ROM";;
     *) os="aosp"; os_string="AOSP ROM";;
 esac;
